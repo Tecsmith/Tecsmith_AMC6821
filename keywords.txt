@@ -1,0 +1,16 @@
+# Syntax Coloring Map for Tecsmith_AMC6821 Library
+# @see: https://arduino.github.io/arduino-cli/latest/library-specification/
+
+# Datatypes (KEYWORD1)
+Tecsmith_AMC6821  KEYWORD1
+
+# Methods and Functions (KEYWORD2)
+begin  KEYWORD2
+
+# Instances (KEYWORD2)
+
+# Structures (KEYWORD3)
+
+# Constants (LITERAL1)
+
+# ? (LITERAL2)

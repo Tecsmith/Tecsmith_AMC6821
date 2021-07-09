@@ -1,0 +1,22 @@
+{
+    "name": "Tecsmith AMC6821",
+    "version": "1.0.0",
+    "description": "Arduino / PlatformIO library for the AMC6821 fan controller",
+    "keywords": "PlatformIO, Arduino, AMC6821, Fan Controller",
+    "license": "MIT",
+    "homepage": "https://Tecsmith.github.io/Tecsmith_AMC6821",
+    "frameworks": "*",
+    "platforms": "*",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Tecsmith/Tecsmith_AMC6821"
+    },
+    "authors": {
+        "name": "Vino Rodrigues",
+        "email": "hello@tecsmith.com.au",
+        "url": "http://tecsmith.com.au"
+    },
+    "dependencies": {
+        "adafruit/Adafruit_BusIO": "^1.8.2"
+    }
+}

@@ -2,9 +2,10 @@
  *  @file Tecsmith_AMC6821.h
  *
  * 	I2C Driver for the Tecsmith AMC6821 fan controll module.
- *      This is a library is written to work with http://c1k.it/amc6
  *
- *	MIT license (@see: LICENSE.md)
+ *  This is a library is written to work with the AMC6821 Breakout, http://c1k.it/amc6
+ *
+ *	MIT license (@see: ../LICENSE.md)
  */
 
 #ifndef _TECSMITH_AMC6821_H
@@ -83,7 +84,7 @@
 typedef enum {  // see p.36, Table 15
   AMC6821_CONF1_FDRC_SOFTWARE_DCY = 0x00,
   AMC6821_CONF1_FDRC_SOFTWARE_RPM = 0x20,
-  AMC6821_CONF1_FDRC_AUTO_REMOTE  = 0x40,
+  AMC6821_CONF1_FDRC_AUTO_REMOTE  = 0x40,  // default
   AMC6821_CONF1_FDRC_MAX_SPEED    = 0x60,
 } amc6821_conf1_fdrc_t;
 #define AMC6821_MASK_CONF1_FDRC    0x60  // see AMC6821_CONF1_FDRC{x}
@@ -135,12 +136,18 @@ class Tecsmith_AMC6821 {
     ~Tecsmith_AMC6821();
 
     uint8_t read(uint8_t addr);
-    bool write(uint8_t addr, uint8_t data, uint8_t mask = 0xFF);
-
     uint16_t read2(uint8_t addrL, uint8_t addrH);
-    bool write2(uint8_t addrL, uint8_t addrH, uint16_t data);
 
-    bool begin(uint8_t i2c_addr = AMC6821_I2CADDR_DEFAULT, TwoWire *wire = &Wire);
+    bool write(uint8_t addr, uint8_t data, uint8_t mask = 0xFF);
+    bool write2(uint8_t addrL, uint8_t addrH, uint16_t data);
+    bool writeBit(uint8_t addr, uint8_t mask, bool on = true);
+
+    bool begin(uint8_t i2c_addr = AMC6821_I2CADDR_DEFAULT,
+               TwoWire *wire = &Wire,
+               amc6821_conf1_fdrc_t mode = AMC6821_CONF1_FDRC_AUTO_REMOTE);
+    bool begin(TwoWire *wire, amc6821_conf1_fdrc_t mode = AMC6821_CONF1_FDRC_AUTO_REMOTE);
+    bool begin(amc6821_conf1_fdrc_t mode);
+
     bool reset();  // called by begin
     bool start();  // called by begin
     bool stop();
@@ -192,9 +199,9 @@ class Tecsmith_AMC6821 {
     bool setLTIntEnable(bool on = true);
     bool setRTIntEnable(bool on = true);
     bool setLPSVIntEnable(bool on = true);
-    bool setReset();
+    bool setReset(bool on = true);
 
-    bool setTermFanEnable(bool on = true);
+    bool setThermFanEnable(bool on = true);
 
     bool setOVREnable(bool on = true);
     bool setTachReadingFast(bool on = true);
@@ -245,18 +252,20 @@ class Tecsmith_AMC6821 {
     // bool setPassiveCoolingTemp(int8_t value);
     // bool setRemoteCriticalTemp(int8_t value);
 
-    // PWM Controler
+    // PWM Controller
 
     uint8_t getFanCharacteristics();
     uint8_t getDutyCycleLowTemp();
     uint8_t getDutyCycle();
+    int8_t getDutyCycleP();
     uint8_t getDutyCycleRamp();
     uint8_t getLocalTempFanControl();
     uint8_t getRemoteTempFanControl();
 
     // bool setFanCharacteristics(uint8_t value);
     // bool setDutyCycleLowTemp(uint8_t value);
-    // bool setDutyCycle(uint8_t value);
+    bool setDutyCycle(uint8_t value);
+    bool setDutyCycleP(int8_t percentage);
     // bool setDutyCycleRamp(uint8_t value);
     // bool setLocalTempFanControl(uint8_t value);
     // bool setRemoteTempFanControl(uint8_t value);
@@ -290,6 +299,9 @@ class Tecsmith_AMC6821 {
     // bool setTachSetting(uint16_t value);
     // bool setTachSettingRPM(uint16_t value);
 
+    static float toFahrenheit(float celsius);
+    static float toCelsius(float fahrenheit);
+
   private:
     int8_t _toInt8(uint8_t x);
     uint16_t _toRPM(uint16_t x);
@@ -297,7 +309,10 @@ class Tecsmith_AMC6821 {
     uint8_t _confAddr(byte no);
     uint8_t _statAddr(byte no);
 
-    bool _init();
+    bool _init(amc6821_conf1_fdrc_t mode = AMC6821_CONF1_FDRC_AUTO_REMOTE);
+    bool _setMode(amc6821_conf1_fdrc_t mode);
+
+    bool _writeBit_Conf4(uint8_t addr, uint8_t mask, bool on);
 
     Adafruit_I2CDevice *i2c_dev = NULL;  ///< Pointer to I2C bus interface
 };

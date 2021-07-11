@@ -146,13 +146,13 @@ bool Tecsmith_AMC6821::begin(amc6821_conf1_fdrc_t mode) {
  * @brief Sends a reset command to the chip.  Similar to `setReset`, but adds a 100 mil delay
  */
 bool Tecsmith_AMC6821::reset() {
-  bool started, ret;
+  bool started;
   started = getStartMonitor();
   if (started) stop();
-  ret = writeBit(AMC6821_REG_CONF2, AMC6821_CONF2_RST, true);
+  writeBit(AMC6821_REG_CONF2, AMC6821_CONF2_RST, true);  // reset is immediate, with no response
   delay(100);  // Include a short delay to allow the chip to cycle.
   if (started) start();
-  return ret;
+  return true;
 }
 
 /**
@@ -719,7 +719,8 @@ uint8_t Tecsmith_AMC6821::getDutyCycle() {
  * @brief Get the DCY (duty cycle) in Percentage, where 0 = 0% and 100 = 100%
  */
 int8_t Tecsmith_AMC6821::getDutyCycleP() {
-  return (read(AMC6821_REG_DCY) / 255) * 100;
+  float f = (read(AMC6821_REG_DCY) / 255.0) * 100;
+  return f;
 }
 
 /**
@@ -754,7 +755,8 @@ bool Tecsmith_AMC6821::setDutyCycle(uint8_t value) {
 
 bool Tecsmith_AMC6821::setDutyCycleP(int8_t percentage) {
   if ((percentage < 0) || (percentage > 100)) return false;
-  return write(AMC6821_REG_DCY, (percentage / 100) * 255);
+  float f = (percentage / 100.0) * 255;
+  return write(AMC6821_REG_DCY, f);
 }
 
 
@@ -876,10 +878,10 @@ float Tecsmith_AMC6821::toCelsius(float fahrenheit) {
  * @brief Does all the hard work after begin
  */
 bool Tecsmith_AMC6821::_init(amc6821_conf1_fdrc_t mode) {
-  reset();
+  bool ret = reset();
   if (AMC6821_CONF1_FDRC_AUTO_REMOTE != mode)
-    _setMode(mode);
-  return start();
+    ret = _setMode(mode);
+  return ret;
 }
 
 /**
